@@ -1,5 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -19,10 +21,6 @@ app.use(express.static(`${__dirname}/public`));
 //   next();
 // });
 
-app.get('/', (req, res) => {
-  res.status(200).send('HEllo from the server side!');
-});
-
 //ROUTE HANDLERS
 
 //==============ROUTES=================
@@ -35,6 +33,12 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use(globalErrorHandler);
 
 // app.route('/api/v1/tours').get(getAllTours).post(createTour);
 
